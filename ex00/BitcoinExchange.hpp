@@ -13,7 +13,7 @@ class BitcoinExchange {
         BitcoinExchange& operator=(const BitcoinExchange& other);
         ~BitcoinExchange();
 
-        void loadCsv();
+        void loadDatabase(const std::string& filename);
         void getRates();
 };
 
