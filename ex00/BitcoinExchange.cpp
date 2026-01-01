@@ -70,5 +70,46 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
 
         _rates[date] = rate;
     }
+}
 
+double BitcoinExchange::rateForDate(const std::string& date) {
+
+    std::map<std::string, double>::iterator it = _rates.lower_bound(date);
+
+    if (it != _rates.end() && it->first == date) {
+        return it->second;
+    }
+}
+
+void BitcoinExchange::processInputFile(const std::string& filename) {
+
+    std::ifstream file(filename);
+
+    if(!file.is_open()) {
+        std::cerr << "Error: could not open file.";
+        return ;
+    }
+
+    std::string line;
+
+        if (!std::getline(file, line)) {
+        std::cerr << "Error: empty text file.\n";
+        return ;
+    }
+
+    while (std::getline(file, line)) {
+        if (line.empty())
+            continue;
+
+        size_t comma = line.find('|');
+        if (comma == std::string::npos) {
+            // std::cerr << "Bad CSV line: " << line << "\n";
+            continue;
+        }
+
+        const std::string inputDate = trim(line.substr(0, comma));
+        const std::string inputAmount = trim(line.substr(comma + 1));
+
+        double result = BitcoinExchange::rateForDate(inputDate);
+    }
 }

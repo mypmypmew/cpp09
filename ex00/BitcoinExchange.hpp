@@ -14,7 +14,8 @@ class BitcoinExchange {
         ~BitcoinExchange();
 
         void loadDatabase(const std::string& filename);
-        void getRates();
+        void processInputFile(const std::string& filename);
+        double rateForDate(const std::string& date);
 };
 
 #endif
