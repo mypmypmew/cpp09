@@ -158,69 +158,78 @@ bool BitcoinExchange::rateForDate(const std::string& date, double& outRate) cons
     return true;
 }
 
+static bool processInputLine(
+    const BitcoinExchange& ex,
+    const std::string& line
+) {
+    if (trim(line).empty())
+        return true;
+
+    size_t pipePos = line.find('|');
+    if (pipePos == std::string::npos) {
+        std::cerr << "Error: bad input => " << line << "\n";
+        return false;
+    }
+
+    const std::string inputDate   = trim(line.substr(0, pipePos));
+    const std::string inputAmount = trim(line.substr(pipePos + 1));
+
+    if (inputDate.empty() || inputAmount.empty()) {
+        std::cerr << "Error: bad input => " << line << "\n";
+        return false;
+    }
+
+    if (!isValidDate(inputDate)) {
+        std::cerr << "Error: bad input => " << line << "\n";
+        return false;
+    }
+
+    double amount;
+    if (!toDoubleStrict(inputAmount, amount)) {
+        std::cerr << "Error: bad input => " << line << "\n";
+        return false;
+    }
+
+    if (amount < 0) {
+        std::cerr << "Error: not a positive number.\n";
+        return false;
+    }
+    if (amount > 1000) {
+        std::cerr << "Error: too large a number.\n";
+        return false;
+    }
+
+    double rate;
+    if (!ex.rateForDate(inputDate, rate)) {
+        std::cerr << "Error: bad input => " << line << "\n";
+        return false;
+    }
+
+    double result = amount * rate;
+    std::cout << inputDate << " => " << amount << " = " << result << "\n";
+    return true;
+}
+
+
 void BitcoinExchange::processInputFile(const std::string& filename) {
-
     std::ifstream file(filename);
-
-    if(!file.is_open()) {
+    if (!file.is_open()) {
         std::cerr << "Error: could not open file.\n";
-        return ;
+        return;
     }
 
     std::string line;
 
-        if (!std::getline(file, line)) {
-        std::cerr << "Error: bad input => " << line << "\n";
-        return ;
+    if (!std::getline(file, line)) {
+        std::cerr << "Error: empty text file.\n";
+        return;
+    }
+
+    if (trim(line) != "date | value") {
+        processInputLine(*this, line);
     }
 
     while (std::getline(file, line)) {
-        if (trim(line).empty())
-            continue;
-
-        size_t pipePos = line.find('|');
-        if (pipePos == std::string::npos) {
-            std::cerr << "Error: bad input => " << line << "\n";
-
-            continue;
-        }
-
-        const std::string inputDate = trim(line.substr(0, pipePos));
-        const std::string inputAmount = trim(line.substr(pipePos + 1));
-
-        if (inputDate.empty() || inputAmount.empty()) {
-            std::cerr << "Error: bad input => " << line << "\n";
-
-            continue;
-        }
-
-        if (!isValidDate(inputDate)) {
-            std::cerr << "Error: bad input => " << line << "\n";
-            continue;
-        }
-
-        double amount;
-        if (!toDoubleStrict(inputAmount, amount)) {
-            std::cerr << "Error: bad input => " << line << "\n";
-            continue;
-        }
-
-        if (amount < 0) {
-            std::cerr << "Error: not a positive number.\n";
-            continue;
-        }
-        if (amount > 1000) {
-            std::cerr << "Error: too large a number.\n";
-            continue;
-        }
-
-
-        double rate;
-        if (!rateForDate(inputDate, rate)) {
-            std::cerr << "Error: bad input => " << line << "\n";
-            continue;
-        }
-        double result = amount * rate;
-        std::cout << inputDate << " => " << amount << " = " << result << "\n";
+        processInputLine(*this, line);
     }
 }
