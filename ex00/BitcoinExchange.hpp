@@ -15,7 +15,7 @@ class BitcoinExchange {
 
         void loadDatabase(const std::string& filename);
         void processInputFile(const std::string& filename);
-        double rateForDate(const std::string& date);
+        bool rateForDate(const std::string& date, double& outRate) const;
 };
 
 #endif

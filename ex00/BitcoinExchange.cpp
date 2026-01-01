@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cctype>
 #include <map>
+#include <iterator>
 
 BitcoinExchange::BitcoinExchange() {};
 BitcoinExchange::BitcoinExchange(const BitcoinExchange& other) {};
@@ -72,13 +73,34 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
     }
 }
 
-double BitcoinExchange::rateForDate(const std::string& date) {
+bool BitcoinExchange::rateForDate(const std::string& date, double& outRate) const {
 
-    std::map<std::string, double>::iterator it = _rates.lower_bound(date);
+    if (_rates.empty()) {
+        return false;
+    }
+
+    std::map<std::string, double>::const_iterator it = _rates.lower_bound(date);
+
+    if (it == _rates.end()) {
+        it = std::prev(_rates.end());
+        outRate = it->second;
+        return true;
+    }
 
     if (it != _rates.end() && it->first == date) {
-        return it->second;
+        outRate = it->second;
+        return true;
+    }  
+    if (it == _rates.begin()) {
+        return false;
     }
+    else {
+        --it;
+        outRate = it->second;
+        return true;
+    }
+
+    return false;
 }
 
 void BitcoinExchange::processInputFile(const std::string& filename) {
@@ -86,7 +108,7 @@ void BitcoinExchange::processInputFile(const std::string& filename) {
     std::ifstream file(filename);
 
     if(!file.is_open()) {
-        std::cerr << "Error: could not open file.";
+        std::cerr << "Error: could not open file.\n";
         return ;
     }
 
@@ -98,18 +120,49 @@ void BitcoinExchange::processInputFile(const std::string& filename) {
     }
 
     while (std::getline(file, line)) {
-        if (line.empty())
+        if (trim(line).empty())
             continue;
 
-        size_t comma = line.find('|');
-        if (comma == std::string::npos) {
-            // std::cerr << "Bad CSV line: " << line << "\n";
+        size_t pipePos = line.find('|');
+        if (pipePos == std::string::npos) {
+            std::cerr << "Error: bad input => " << line << "\n";
+
             continue;
         }
 
-        const std::string inputDate = trim(line.substr(0, comma));
-        const std::string inputAmount = trim(line.substr(comma + 1));
+        const std::string inputDate = trim(line.substr(0, pipePos));
+        const std::string inputAmount = trim(line.substr(pipePos + 1));
 
-        double result = BitcoinExchange::rateForDate(inputDate);
+        if (inputDate.empty() || inputAmount.empty()) {
+            std::cerr << "Error: bad input => " << line << "\n";
+
+            continue;
+        }
+
+        /* Date validation? */
+
+        double amount;
+        if (!toDoubleStrict(inputAmount, amount)) {
+            std::cerr << "Error: bad input => " << line << "\n";
+            continue;
+        }
+
+        if (amount < 0) {
+            std::cerr << "Error: not a positive number.\n";
+            continue;
+        }
+        if (amount > 1000) {
+            std::cerr << "Error: too large a number.\n";
+            continue;
+        }
+
+
+        double rate;
+        if (!rateForDate(inputDate, rate)) {
+            std::cerr << "Error: bad input => " << line << "\n";
+            continue;
+        }
+        double result = amount * rate;
+        std::cout << inputDate << " => " << amount << " = " << result << "\n";
     }
 }
