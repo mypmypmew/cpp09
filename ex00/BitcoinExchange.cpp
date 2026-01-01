@@ -8,8 +8,14 @@
 #include <iterator>
 
 BitcoinExchange::BitcoinExchange() {};
-BitcoinExchange::BitcoinExchange(const BitcoinExchange& other) {};
-BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {};
+BitcoinExchange::BitcoinExchange(const BitcoinExchange& other) 
+            : _rates(other._rates) {};
+BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
+        if (this != &other) {
+        _rates = other._rates;
+    }
+    return *this;
+};
 BitcoinExchange::~BitcoinExchange() {};
 
 static std::string trim(std::string s) {
@@ -39,7 +45,7 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
     std::ifstream file(filename);
 
     if (!file.is_open()) {
-        std::cerr << "Error: could not open file.";
+        std::cerr << "Error: could not open file.\n";
         return ;
     }
 
@@ -73,6 +79,59 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
     }
 }
 
+static bool isValidDateFormat(const std::string& s) {
+    if (s.size() != 10)
+        return false;
+    if (s[4] != '-' || s[7] != '-')
+        return false;
+
+    for (size_t i = 0; i < s.size(); ++i) {
+        if (i == 4 || i == 7)
+            continue;
+        if (!std::isdigit(static_cast<unsigned char>(s[i])))
+            return false;
+    }
+    return true;
+}
+
+static int toInt2(const std::string& s, size_t pos) {
+    return (s[pos] - '0') * 10 + (s[pos + 1] - '0');
+}
+
+static int toInt4(const std::string& s, size_t pos) {
+    return (s[pos] - '0') * 1000
+         + (s[pos + 1] - '0') * 100
+         + (s[pos + 2] - '0') * 10
+         + (s[pos + 3] - '0');
+}
+
+static bool isLeapYear(int y) {
+    if (y % 400 == 0) return true;
+    if (y % 100 == 0) return false;
+    return (y % 4 == 0);
+}
+
+static int daysInMonth(int y, int m) {
+    static const int days[] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+    if (m == 2) return days[1] + (isLeapYear(y) ? 1 : 0);
+    return days[m - 1];
+}
+
+static bool isValidDate(const std::string& s) {
+    if (!isValidDateFormat(s))
+        return false;
+
+    int y = toInt4(s, 0);
+    int m = toInt2(s, 5);
+    int d = toInt2(s, 8);
+
+    if (m < 1 || m > 12) return false;
+    int dim = daysInMonth(y, m);
+    if (d < 1 || d > dim) return false;
+
+    return true;
+}
+
 bool BitcoinExchange::rateForDate(const std::string& date, double& outRate) const {
 
     if (_rates.empty()) {
@@ -87,20 +146,16 @@ bool BitcoinExchange::rateForDate(const std::string& date, double& outRate) cons
         return true;
     }
 
-    if (it != _rates.end() && it->first == date) {
+    if (it->first == date) {
         outRate = it->second;
         return true;
     }  
     if (it == _rates.begin()) {
         return false;
     }
-    else {
-        --it;
-        outRate = it->second;
-        return true;
-    }
-
-    return false;
+    --it;
+    outRate = it->second;
+    return true;
 }
 
 void BitcoinExchange::processInputFile(const std::string& filename) {
@@ -115,7 +170,7 @@ void BitcoinExchange::processInputFile(const std::string& filename) {
     std::string line;
 
         if (!std::getline(file, line)) {
-        std::cerr << "Error: empty text file.\n";
+        std::cerr << "Error: bad input => " << line << "\n";
         return ;
     }
 
@@ -139,7 +194,10 @@ void BitcoinExchange::processInputFile(const std::string& filename) {
             continue;
         }
 
-        /* Date validation? */
+        if (!isValidDate(inputDate)) {
+            std::cerr << "Error: bad input => " << line << "\n";
+            continue;
+        }
 
         double amount;
         if (!toDoubleStrict(inputAmount, amount)) {
