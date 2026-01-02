@@ -1,8 +1,9 @@
 #ifndef PMERGEME_HPP
 #define PMERGEME_HPP
 
-#include <stack>
 #include <string>
+#include <vector>
+#include <deque>
 
 class PmergeMe {
     public:
@@ -14,15 +15,18 @@ class PmergeMe {
         int run(int argc, char** argv);
 
     private:
-        std::vector<int>_input;
+        std::vector<int> _input;
 
-        bool parseInput(int argc, char**argv);
         void printBefore() const;
         void printAfter(const std::vector<int>& v) const;
+        bool parseInput(int argc, char** argv);
+        void FordJohnsonSortVector(std::vector<int>& v);
 
         static void printSequence(const std::string& label,
                                 const std::vector<int>& c,
                                 std::size_t maxPrint = 20);
+        static void sortVector(std::vector<int>& v);
+        static void sortDeque(std::deque<int>& d);
 
 };
 
