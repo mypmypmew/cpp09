@@ -57,10 +57,11 @@ void FordJohnsonSortVector(std::vector<int>& v) {
     int left = -1;
     bool hasLeft = (v.size() % 2 == 1);
 
-    if (hasLeft)
+    if (hasLeft) {
         left = v.back();
+    }
 
-        for (size_t i = 0; i + 1 < v.size(); i += 2) {
+    for (size_t i = 0; i + 1 < v.size(); i += 2) {
         int a = v[i], b = v[i + 1];
         int small = (a < b) ? a : b;
         int big   = (a < b) ? b : a;
