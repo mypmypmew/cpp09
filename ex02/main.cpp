@@ -5,6 +5,7 @@
 #include <limits>
 #include <chrono>
 #include <algorithm>
+#include "PmergeMe.hpp"
 
 static size_t jacobsthal(size_t k) {
     if (k == 0) return 0;
@@ -174,33 +175,6 @@ static void sortDeque(std::deque<int>& d) {
 }
 
 int main(int argc, char** argv) {
-    std::vector<int> input;
-    std::vector<std::pair<int, int>> pairVector;
-
-    if (!parseInput(input, argc, argv))
-        return 1;
-
-    printSequence("Before: ", input);
-
-    std::vector<int> v = input;
-    std::deque<int>  d(input.begin(), input.end());
-
-    auto t1 = std::chrono::high_resolution_clock::now();
-    FordJohnsonSortVector(v);
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto vec_us = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-
-    auto t3 = std::chrono::high_resolution_clock::now();
-    sortDeque(d);
-    auto t4 = std::chrono::high_resolution_clock::now();
-    auto deq_us = std::chrono::duration_cast<std::chrono::microseconds>(t4 - t3).count();
-
-    printSequence("After:  ", v);
-
-    std::cout << "Time to process a range of " << v.size()
-              << " elements with std::vector : " << vec_us << " us\n";
-    std::cout << "Time to process a range of " << d.size()
-              << " elements with std::deque  : " << deq_us << " us\n";
-
-    return 0;
+    PmergeMe app;
+    return app.run(argc, argv);
 }

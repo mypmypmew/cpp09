@@ -59,10 +59,26 @@ static void sortDeque(std::deque<int>& d) {
 int PmergeMe::run(int argc, char** argv) {
     if (!parseInput(argc, argv))
         return 1;
-        
+
     printBefore();
 
     std::vector<int> v = _input;
     std::deque<int>  d(_input.begin(), _input.end());
-    
+
+    //victor
+    auto t1 = std::chrono::high_resolution_clock::now();
+    sortVector(v);
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto vec_us = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+
+    //deque
+    auto t3 = std::chrono::high_resolution_clock::now();
+    sortDeque(d);
+    auto t4 = std::chrono::high_resolution_clock::now();
+    auto deq_us = std::chrono::duration_cast<std::chrono::microseconds>(t4 - t3).count();
+
+    printAfter(v);
+
+
+    return 0;
 }
