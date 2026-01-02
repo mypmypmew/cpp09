@@ -6,6 +6,31 @@
 #include <chrono>
 #include <algorithm>
 
+void FordJohnsonSortVector(std::vector<int>& v) {
+    if (v.size() <= 1) {
+        return ;
+    }
+
+    std::vector<int> mainChain;
+    std::vector<std::pair<int,int>> pendPairs;
+
+    int left = -1;
+    bool hasLeft = (v.size() % 2 == 1);
+
+    if (hasLeft)
+        left = v.back();
+
+        for (size_t i = 0; i + 1 < v.size(); i += 2) {
+        int a = v[i], b = v[i + 1];
+        int small = (a < b) ? a : b;
+        int big   = (a < b) ? b : a;
+        pendPairs.push_back({small, big});
+        mainChain.push_back(big);
+    }
+    // FordJohnsonSortVector(mainChain);
+
+
+}
 
 template <typename Container>
 static void pasteNumber(int x, Container& c) {
@@ -67,6 +92,8 @@ static void printSequence(const std::string& label, const Container& c, std::siz
     std::cout << "\n";
 }
 
+
+
 static void sortVector(std::vector<int>& v) {
     std::sort(v.begin(), v.end());
 }
@@ -83,18 +110,6 @@ int main(int argc, char** argv) {
         return 1;
 
     printSequence("Before: ", input);
-
-    for (size_t i = 0; i+1 < input.size(); i+=2) {
-        int x = input[i];
-        int y = input[i+1];
-        if (x < y)
-            pairVector.push_back({x, y});
-        else 
-            pairVector.push_back({y, x});
-    }
-    int left = -1;
-    if (input.size() % 2 == 1)
-        left = input[input.size() - 1];
 
     std::vector<int> v = input;
     std::deque<int>  d(input.begin(), input.end());
