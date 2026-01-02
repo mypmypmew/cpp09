@@ -6,6 +6,14 @@
 #include <chrono>
 #include <algorithm>
 
+
+template <typename Container>
+static void pasteNumber(int x, Container& c) {
+    auto pos = c.lower_bound(c.begin(), c.end(), x);
+    c.insert(pos, x);
+}
+
+
 static bool parseInput(std::vector<int>& out, int argc, char** argv) {
     if (argc < 2) {
         std::cerr << "Error\n";
@@ -69,10 +77,24 @@ static void sortDeque(std::deque<int>& d) {
 
 int main(int argc, char** argv) {
     std::vector<int> input;
+    std::vector<std::pair<int, int>> pairVector;
+
     if (!parseInput(input, argc, argv))
         return 1;
 
     printSequence("Before: ", input);
+
+    for (size_t i = 0; i+1 < input.size(); i+=2) {
+        int x = input[i];
+        int y = input[i+1];
+        if (x < y)
+            pairVector.push_back({x, y});
+        else 
+            pairVector.push_back({y, x});
+    }
+    int left = -1;
+    if (input.size() % 2 == 1)
+        left = input[input.size() - 1];
 
     std::vector<int> v = input;
     std::deque<int>  d(input.begin(), input.end());
@@ -89,7 +111,6 @@ int main(int argc, char** argv) {
 
     printSequence("After:  ", v);
 
-    // Время
     std::cout << "Time to process a range of " << v.size()
               << " elements with std::vector : " << vec_us << " us\n";
     std::cout << "Time to process a range of " << d.size()
