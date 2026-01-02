@@ -6,6 +6,38 @@
 #include <chrono>
 #include <algorithm>
 
+static size_t jacobsthal(size_t k) {
+    if (k == 0) return 0;
+    if (k == 1) return 1;
+    size_t a = 0, b = 1;
+    for (size_t i = 2; i <= k; ++i) {
+        size_t c = b + 2 * a;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+static std::vector<size_t> buildJacobOrder(size_t pendSize) {
+    std::vector<size_t> order;
+    if (pendSize <= 1) return order;
+
+    size_t prev = 1;
+    for (size_t k = 3;; ++k) {
+        size_t j = jacobsthal(k);
+        if (j > pendSize) break;
+
+        for (size_t idx = j; idx > prev; --idx)
+            order.push_back(idx - 1);
+
+        prev = j;
+    }
+
+    for (size_t idx = pendSize; idx > prev; --idx)
+        order.push_back(idx - 1);
+
+    return order;
+}
 
 static void insertNumberVector(std::vector<int>& mainChain, int small, int big) {
 
@@ -40,6 +72,22 @@ void FordJohnsonSortVector(std::vector<int>& v) {
     leftPairsOrder.reserve(leftPairs.size());
     std::vector<bool> used(leftPairs.size(), false);
 
+        for (int big : mainChain) {
+        for (size_t i = 0; i < leftPairs.size(); ++i) {
+            if (!used[i] && leftPairs[i].second == big) {
+                used[i] = true;
+                leftPairsOrder.push_back(leftPairs[i]);
+                break;
+            }
+        }
+    }
+    leftPairs.swap(leftPairsOrder);
+
+    if (!leftPairs.empty()) {
+        insertNumberVector(mainChain, leftPairs[0].first, leftPairs[0].second);
+
+        std::vector<size_t> order = buildJacobOrder(leftPairs.size());
+    }
 
 }
 
