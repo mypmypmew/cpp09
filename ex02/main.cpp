@@ -66,7 +66,7 @@ void FordJohnsonSortVector(std::vector<int>& v) {
         leftPairs.push_back({small, big});
         mainChain.push_back(big);
     }
-    // FordJohnsonSortVector(mainChain);
+    FordJohnsonSortVector(mainChain);
 
     std::vector<std::pair<int, int>> leftPairsOrder;
     leftPairsOrder.reserve(leftPairs.size());
@@ -87,8 +87,18 @@ void FordJohnsonSortVector(std::vector<int>& v) {
         insertNumberVector(mainChain, leftPairs[0].first, leftPairs[0].second);
 
         std::vector<size_t> order = buildJacobOrder(leftPairs.size());
+
+        for (size_t idx : order) {
+            insertNumberVector(mainChain, leftPairs[idx].first, leftPairs[idx].second);
+        }
     }
 
+    if (hasLeft) {
+        auto pos = std::lower_bound(mainChain.begin(), mainChain.end(), left);
+        mainChain.insert(pos, left);
+    }
+
+    v.swap(mainChain);
 }
 
 template <typename Container>
