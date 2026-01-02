@@ -43,6 +43,7 @@ static void insertNumberVector(std::vector<int>& mainChain, int small, int big) 
 
     auto iterBig = std::lower_bound(mainChain.begin(), mainChain.end(), big);
     auto pos = std::lower_bound(mainChain.begin(), iterBig, small);
+    mainChain.insert(pos, small);
 }
 
 void FordJohnsonSortVector(std::vector<int>& v) {
@@ -184,7 +185,7 @@ int main(int argc, char** argv) {
     std::deque<int>  d(input.begin(), input.end());
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    sortVector(v);
+    FordJohnsonSortVector(v);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto vec_us = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
