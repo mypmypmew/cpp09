@@ -6,13 +6,20 @@
 #include <chrono>
 #include <algorithm>
 
+
+static void insertNumberVector(std::vector<int>& mainChain, int small, int big) {
+
+    auto iterBig = std::lower_bound(mainChain.begin(), mainChain.end(), big);
+    auto pos = std::lower_bound(mainChain.begin(), iterBig, small);
+}
+
 void FordJohnsonSortVector(std::vector<int>& v) {
     if (v.size() <= 1) {
         return ;
     }
 
     std::vector<int> mainChain;
-    std::vector<std::pair<int,int>> pendPairs;
+    std::vector<std::pair<int,int>> leftPairs;
 
     int left = -1;
     bool hasLeft = (v.size() % 2 == 1);
@@ -24,10 +31,14 @@ void FordJohnsonSortVector(std::vector<int>& v) {
         int a = v[i], b = v[i + 1];
         int small = (a < b) ? a : b;
         int big   = (a < b) ? b : a;
-        pendPairs.push_back({small, big});
+        leftPairs.push_back({small, big});
         mainChain.push_back(big);
     }
     // FordJohnsonSortVector(mainChain);
+
+    std::vector<std::pair<int, int>> leftPairsOrder;
+    leftPairsOrder.reserve(leftPairs.size());
+    std::vector<bool> used(leftPairs.size(), false);
 
 
 }
