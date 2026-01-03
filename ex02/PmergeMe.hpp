@@ -21,6 +21,7 @@ class PmergeMe {
         void printAfter(const std::vector<int>& v) const;
         bool parseInput(int argc, char** argv);
         void FordJohnsonSortVector(std::vector<int>& v);
+        void FordJohnsonSortDeque(std::deque<int>& d);
 
         static void printSequence(const std::string& label,
                                 const std::vector<int>& c,

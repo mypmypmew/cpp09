@@ -55,6 +55,64 @@ static void insertNumberVector(std::vector<int>& mainChain, int small, int big) 
     mainChain.insert(pos, small);
 }
 
+static void insertNumberDeque(std::deque<int>& mainChain, int small, int big) {
+    auto iterBig = std::lower_bound(mainChain.begin(), mainChain.end(), big);
+    auto pos = std::lower_bound(mainChain.begin(), iterBig, small);
+    mainChain.insert(pos, small);
+}
+
+void PmergeMe::FordJohnsonSortDeque(std::deque<int>& d) {
+    if (d.size() <= 1) return;
+
+    std::deque<int> mainChain;
+    std::vector<std::pair<int,int>> leftPairs; // пары оставляем vector — удобно по индексам
+
+    int left = -1;
+    bool hasLeft = (d.size() % 2 == 1);
+    if (hasLeft) left = d.back();
+
+    for (size_t i = 0; i + 1 < d.size(); i += 2) {
+        int a = d[i], b = d[i + 1];
+        int small = (a < b) ? a : b;
+        int big   = (a < b) ? b : a;
+        leftPairs.push_back({small, big});
+        mainChain.push_back(big);
+    }
+
+    FordJohnsonSortDeque(mainChain);
+
+    std::vector<std::pair<int, int>> leftPairsOrder;
+    leftPairsOrder.reserve(leftPairs.size());
+    std::vector<bool> used(leftPairs.size(), false);
+
+    for (int big : mainChain) {
+        for (size_t i = 0; i < leftPairs.size(); ++i) {
+            if (!used[i] && leftPairs[i].second == big) {
+                used[i] = true;
+                leftPairsOrder.push_back(leftPairs[i]);
+                break;
+            }
+        }
+    }
+    leftPairs.swap(leftPairsOrder);
+
+    if (!leftPairs.empty()) {
+        insertNumberDeque(mainChain, leftPairs[0].first, leftPairs[0].second);
+
+        std::vector<size_t> order = buildJacobOrder(leftPairs.size());
+        for (size_t idx : order) {
+            insertNumberDeque(mainChain, leftPairs[idx].first, leftPairs[idx].second);
+        }
+    }
+
+    if (hasLeft) {
+        auto pos = std::lower_bound(mainChain.begin(), mainChain.end(), left);
+        mainChain.insert(pos, left);
+    }
+
+    d.swap(mainChain);
+}
+
 void PmergeMe::FordJohnsonSortVector(std::vector<int>& v) {
     if (v.size() <= 1) {
         return ;
@@ -192,7 +250,7 @@ int PmergeMe::run(int argc, char** argv) {
 
     //deque
     auto t3 = std::chrono::high_resolution_clock::now();
-    sortDeque(d);
+    FordJohnsonSortDeque(d);
     auto t4 = std::chrono::high_resolution_clock::now();
     auto deq_us = std::chrono::duration_cast<std::chrono::microseconds>(t4 - t3).count();
 
