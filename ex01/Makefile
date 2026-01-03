@@ -1,8 +1,7 @@
 NAME      := RPN
 
 CXX       := c++
-# CXXFLAGS  := -Wall -Wextra -Werror -std=c++17
-CXXFLAGS := -std=c++17
+CXXFLAGS  := -Wall -Wextra -Werror -std=c++17
 
 SRCS      := main.cpp RPN.cpp
 OBJS      := $(SRCS:.cpp=.o)
