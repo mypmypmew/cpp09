@@ -4,6 +4,7 @@
 #include <limits>
 #include <chrono>
 #include <algorithm>
+#include <set>
 
 PmergeMe::PmergeMe() {}
 PmergeMe::PmergeMe(const PmergeMe& other) : _input(other._input) {}
@@ -65,7 +66,7 @@ void PmergeMe::FordJohnsonSortDeque(std::deque<int>& d) {
     if (d.size() <= 1) return;
 
     std::deque<int> mainChain;
-    std::vector<std::pair<int,int>> leftPairs; // пары оставляем vector — удобно по индексам
+    std::vector<std::pair<int,int>> leftPairs;
 
     int left = -1;
     bool hasLeft = (d.size() % 2 == 1);
@@ -177,6 +178,9 @@ bool PmergeMe::parseInput(int argc, char** argv) {
     }
 
     _input.reserve(static_cast<size_t>(argc - 1));
+    _input.clear();
+
+    std::set<int> seen;
 
     for (int i = 1; i < argc; ++i) {
         try {
@@ -193,7 +197,16 @@ bool PmergeMe::parseInput(int argc, char** argv) {
                 return false;
             }
 
-            _input.push_back(static_cast<int>(val));
+            int x = static_cast<int>(val);
+
+            if (!seen.insert(x).second) {
+                std::cerr << "Error\n";
+                return false;
+            }
+
+            
+
+            _input.push_back(x);
         } catch (...) {
             std::cerr << "Error\n";
             return false;
@@ -223,14 +236,6 @@ void PmergeMe::printBefore() const {
 
 void PmergeMe::printAfter(const std::vector<int>& v) const {
     printSequence("After:  ", v);
-}
-
-void PmergeMe::sortVector(std::vector<int>& v) {
-    std::sort(v.begin(), v.end());
-}
-
-void PmergeMe::sortDeque(std::deque<int>& d) {
-    std::sort(d.begin(), d.end());
 }
 
 int PmergeMe::run(int argc, char** argv) {

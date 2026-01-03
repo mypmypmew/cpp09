@@ -20,14 +20,12 @@ class PmergeMe {
         void printBefore() const;
         void printAfter(const std::vector<int>& v) const;
         bool parseInput(int argc, char** argv);
-        void FordJohnsonSortVector(std::vector<int>& v);
-        void FordJohnsonSortDeque(std::deque<int>& d);
+        static void FordJohnsonSortVector(std::vector<int>& v);
+        static void FordJohnsonSortDeque(std::deque<int>& d);
 
         static void printSequence(const std::string& label,
                                 const std::vector<int>& c,
                                 std::size_t maxPrint = 20);
-        static void sortVector(std::vector<int>& v);
-        static void sortDeque(std::deque<int>& d);
 
 };
 
