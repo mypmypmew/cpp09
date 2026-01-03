@@ -259,6 +259,11 @@ int PmergeMe::run(int argc, char** argv) {
     auto t4 = std::chrono::high_resolution_clock::now();
     auto deq_us = std::chrono::duration_cast<std::chrono::microseconds>(t4 - t3).count();
 
+    if (v.size() != d.size() || !std::equal(v.begin(), v.end(), d.begin())) {
+        std::cerr << "Error\n";
+        return 1;
+    }
+    
     printAfter(v);
 
     std::cout << "Time to process a range of " << v.size()
