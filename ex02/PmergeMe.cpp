@@ -177,8 +177,9 @@ bool PmergeMe::parseInput(int argc, char** argv) {
         return false;
     }
 
-    _input.reserve(static_cast<size_t>(argc - 1));
     _input.clear();
+    _input.reserve(static_cast<size_t>(argc - 1));
+    
 
     std::set<int> seen;
 
